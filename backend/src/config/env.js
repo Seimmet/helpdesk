@@ -4,8 +4,11 @@ dotenv.config();
 
 export const ENV = {
   NODE_ENV: process.env.NODE_ENV,
-  PORT: process.env.PORT,
+  PORT: Number(process.env.PORT) || 3000,
   DB_URL: process.env.DB_URL,
+  JWT_SECRET: process.env.JWT_SECRET,
+  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "7d",
+  CLIENT_URL: process.env.CLIENT_URL || "http://localhost:5173",
   CLERK_PUBLISHABLE_KEY: process.env.CLERK_PUBLISHABLE_KEY,
   CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
   INNGEST_SIGNING_KEY: process.env.INNGEST_SIGNING_KEY,
