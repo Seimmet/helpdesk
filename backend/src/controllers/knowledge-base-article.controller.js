@@ -258,3 +258,29 @@ export async function publishArticle(req, res) {
     });
   }
 }
+
+export async function markArticleHelpful(req, res) {
+  try {
+    const { id: articleId } = req.params;
+
+    const article = await KnowledgeBaseArticle.findOne({
+      _id: articleId,
+      organizationId: req.user.organizationId,
+    });
+
+    if (!article) {
+      return res.status(404).json({ error: "Article not found" });
+    }
+
+    article.helpfulCount += 1;
+    await article.save();
+
+    return res.status(200).json({
+      message: "Article feedback recorded",
+      article,
+    });
+  } catch (error) {
+    console.error("Error marking article helpful:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}

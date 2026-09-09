@@ -139,12 +139,43 @@ export async function updateUser(req, res) {
         ? imageUrl
         : user.imageUrl;
 
-    user.role = role || user.role;
+    if (role && role !== user.role) {
+      if (user.role === "owner") {
+        return res.status(403).json({
+          error: "The organization owner role cannot be changed",
+        });
+      }
 
-    user.isActive =
-      isActive !== undefined
-        ? isActive
-        : user.isActive;
+      // Owners may manage admin/agent roles. Admins may manage agents only.
+      if (req.user.role === "admin" && role !== "agent") {
+        return res.status(403).json({
+          error: "Admins can only assign the agent role",
+        });
+      }
+
+      if (req.user.role !== "owner" && role !== "agent") {
+        return res.status(403).json({
+          error: "You do not have permission to assign this role",
+        });
+      }
+
+      if (user.role === "owner" && req.user.id.toString() !== user._id.toString()) {
+        return res.status(403).json({
+          error: "The organization owner cannot be modified by another user",
+        });
+      }
+
+      user.role = role;
+    }
+
+    if (isActive !== undefined) {
+      if (user.role === "owner" && !isActive) {
+        return res.status(403).json({
+          error: "The organization owner cannot be deactivated",
+        });
+      }
+      user.isActive = isActive;
+    }
 
     await user.save();
 
@@ -176,6 +207,12 @@ export async function deleteUser(req, res) {
     if (!user) {
       return res.status(404).json({
         error: "User not found",
+      });
+    }
+
+    if (user.role === "owner") {
+      return res.status(403).json({
+        error: "The organization owner cannot be deactivated",
       });
     }
 

@@ -7,6 +7,7 @@ import {
   updateArticle,
   deleteArticle,
   publishArticle,
+  markArticleHelpful,
 } from "../controllers/knowledge-base-article.controller.js";
 
 import {
@@ -27,6 +28,8 @@ router.get("/:id", getArticle);
 router.put("/:id", requireAdmin, updateArticle);
 
 router.patch("/:id/publish", requireAdmin, publishArticle);
+
+router.patch("/:id/helpful", markArticleHelpful);
 
 router.delete("/:id", requireAdmin, deleteArticle);
 

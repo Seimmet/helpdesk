@@ -23,7 +23,7 @@ export const validate = (schema) => {
       // Replace request data with validated/transformed data
       req.body = result.data.body;
       req.params = result.data.params;
-      req.query = result.data.query;
+      // Note: req.query is read-only in Express 5.x, so we skip reassigning it
 
       next();
     } catch (error) {

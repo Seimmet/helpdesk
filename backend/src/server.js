@@ -1,5 +1,4 @@
 import express from "express";
-import path from "path";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
@@ -30,7 +29,6 @@ import { errorMiddleware } from "./middleware/error.middleware.js";
 const app = express();
 app.use(cookieParser());
 
-const __dirname = path.resolve();
 
 /*
 |--------------------------------------------------------------------------
@@ -171,11 +169,9 @@ app.get("/api/health", (req, res) => {
 
 /*
 |--------------------------------------------------------------------------
-| 404 Handler
+| 404 + Global Error Handler
 |--------------------------------------------------------------------------
 */
-
-app.use(errorMiddleware);
 
 app.use((req, res) => {
   res.status(404).json({
@@ -184,21 +180,7 @@ app.use((req, res) => {
   });
 });
 
-
-/*
-|--------------------------------------------------------------------------
-| Global Error Handler
-|--------------------------------------------------------------------------
-*/
-
-app.use((err, req, res, next) => {
-  console.error("Server Error:", err);
-
-  res.status(err.statusCode || 500).json({
-    success: false,
-    message: err.message || "Internal server error",
-  });
-});
+app.use(errorMiddleware);
 
 
 /*

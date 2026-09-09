@@ -1,6 +1,7 @@
 import { Ticket } from "../models/ticket.model.js";
 import { Customer } from "../models/customer.model.js";
 import { User } from "../models/user.model.js";
+import { Message } from "../models/message.model.js";
 
 export async function createTicket(req, res) {
   try {
@@ -55,6 +56,28 @@ export async function createTicket(req, res) {
     customer.lastContactAt = new Date();
 
     await customer.save();
+
+    // Store the initial ticket description as the customer's first message.
+    // This keeps the conversation history consistent with tickets received by email.
+    if (req.body.description) {
+      await Message.create({
+        ticketId: ticket._id,
+        organizationId,
+        senderType: "customer",
+        senderId: customer._id,
+        senderName: customer.name,
+        senderEmail: customer.email,
+        subject,
+        bodyText: req.body.description,
+        direction: "inbound",
+        channel: source || "web",
+        isInternal: false,
+        sentAt: ticket.createdAt,
+      });
+
+      ticket.lastMessageAt = ticket.createdAt;
+      await ticket.save();
+    }
 
     const populatedTicket = await Ticket.findById(
       ticket._id
